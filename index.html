@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>新卒採用インフォメーションハブ</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <h1>新卒採用インフォメーションハブ</h1>
+    <p class="subtitle">新卒採用ニュース / マーケットレポート / AI活用事例を一箇所でキャッチアップ</p>
+  </div>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button class="tab-btn active" data-target="news">採用ニュース</button>
+  <button class="tab-btn" data-target="market-reports">マーケットレポート</button>
+  <button class="tab-btn" data-target="ai-cases">AI活用事例</button>
+</nav>
+
+<main class="container">
+  <section id="news" class="panel active">
+    <div class="panel-list" data-source="data/news.json"></div>
+  </section>
+  <section id="market-reports" class="panel">
+    <div class="panel-list" data-source="data/market-reports.json"></div>
+  </section>
+  <section id="ai-cases" class="panel">
+    <div class="panel-list" data-source="data/ai-cases.json"></div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <p>データは <code>data/*.json</code> を手動で更新して反映します。最終更新は各カードのソースリンク先で確認してください。</p>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>
