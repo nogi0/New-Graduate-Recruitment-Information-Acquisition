@@ -38,5 +38,29 @@
     "date": "2026",
     "summary": "人事担当者779人調査。6割超が「今のやり方を変える必要がある」、AI活用で採用業務を効率化できると考える人が約55%、採用人数が今より減ると予測する人が約4割。",
     "tags": ["生成AI", "採用戦略", "人事意識調査"]
+  },
+  {
+    "title": "LINEヤフー、全社員に生成AI活用を義務化。人事領域で月1,600時間超の工数削減見込み",
+    "source": "note（AIworker）",
+    "url": "https://note.com/ai__worker/n/naa86c17b8b88",
+    "date": "2026",
+    "summary": "2025年7月に全従業員約1.1万人へ生成AI活用義務化を宣言し、2026年春までに人事総務領域で10件のAI活用ツールを順次運用開始。採用戦略のデータ整理支援やAI面接官トレーニング、日程調整の自動化などを含む。",
+    "tags": ["生成AI", "LINEヤフー", "業務効率化"]
+  },
+  {
+    "title": "パナソニックHD「AI Career Supporter」、学生NPSを+18から+42に改善",
+    "source": "Works Human Intelligence",
+    "url": "https://www.works-hi.co.jp/businesscolumn/ai_and_recruitment",
+    "date": "2026",
+    "summary": "150超の職種情報と候補者プロファイルをAIで照合。説明会・面談工数の約30%をオンラインでの自己解決に置き換え、学生の推奨度スコア（NPS）を大幅に向上させた。",
+    "tags": ["AI Career Supporter", "パナソニック", "学生体験"]
+  },
+  {
+    "title": "AI検索時代、採用サイトに求められるLLMO対策",
+    "source": "ビットセンス",
+    "url": "https://www.bitsense.co.jp/ai-recruit-site/",
+    "date": "2026-07-03",
+    "summary": "学生の情報収集がAI検索経由にシフトする中、採用サイトが「見つけてもらえない」リスクに備える必要性を指摘。AIは雰囲気ではなく具体的な情報をもとに判断するため、コンテンツの構造化が重要に。",
+    "tags": ["LLMO", "採用サイト", "AI検索"]
   }
 ]
