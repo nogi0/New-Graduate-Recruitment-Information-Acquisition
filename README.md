@@ -49,7 +49,21 @@ python3 -m http.server 8000
 3. リポジトリの Settings > Pages で Source を `main` ブランチ / ルートに設定
 4. 数分後に公開URLが発行される
 
-## 今後の運用（現状は手動）
+## 自動収集（GitHub Actions）
 
-現状は `data/*.json` を手動で編集して情報を追加する運用。
-将来的に GitHub Actions などで定期的にニュース収集〜JSON更新を自動化することも検討。
+`scripts/collect_news.py` が Google News の検索RSS（新卒採用ニュース／AI活用事例／マーケットレポート系の3クエリ）
+を取得し、`data/*.json` に未登録のものだけ追記する。外部APIキーは不要（標準ライブラリのみ）。
+
+- `.github/workflows/collect-news.yml` が毎週月曜 9:00 JST に自動実行（`workflow_dispatch` で手動実行も可能）
+- 収集結果は `main` に直接コミットされず、レビュー用のプルリクエストとして作成される
+  （[peter-evans/create-pull-request](https://github.com/peter-evans/create-pull-request) を使用）
+- 新着が無ければPRは作成されない
+- Google Newsの検索結果ベースのため精度は完全ではない。無関係な記事や重複が混ざることがあるので、
+  PRの内容は必ず目視確認してからマージすること
+
+ローカルで試す場合:
+
+```bash
+python3 scripts/collect_news.py
+git diff data/
+```

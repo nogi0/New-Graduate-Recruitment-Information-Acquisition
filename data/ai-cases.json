@@ -5,7 +5,10 @@
     "url": "https://business-ai.jp/parsonal/grad-hiring/",
     "date": "2026",
     "summary": "すでに数百人規模でAI面接を活用。「より均一に評価できる上、作業時間も削減できている」と人事担当者がコメント。",
-    "tags": ["AI面接", "ウエルシア薬局"]
+    "tags": [
+      "AI面接",
+      "ウエルシア薬局"
+    ]
   },
   {
     "title": "富士通、26年度入社から新卒の一括採用を廃止",
@@ -13,7 +16,11 @@
     "url": "https://business-ai.jp/parsonal/grad-hiring/",
     "date": "2026",
     "summary": "AIによって入社5年目までの定型業務は代替されうるとの判断から、強い目的意識を持つ人材を個別に見極める採用へ転換。",
-    "tags": ["一括採用廃止", "富士通", "採用戦略転換"]
+    "tags": [
+      "一括採用廃止",
+      "富士通",
+      "採用戦略転換"
+    ]
   },
   {
     "title": "ソフトバンク、書類選考へのAI活用でES確認業務を約1/4に短縮",
@@ -21,7 +28,11 @@
     "url": "https://business-ai.jp/parsonal/grad-hiring/",
     "date": "2026",
     "summary": "年間数千件・680時間かかっていたエントリーシート確認業務をAI活用により大幅短縮。書類選考の効率化事例。",
-    "tags": ["AI書類選考", "ソフトバンク", "業務効率化"]
+    "tags": [
+      "AI書類選考",
+      "ソフトバンク",
+      "業務効率化"
+    ]
   },
   {
     "title": "AI利用拡大で新卒採用は「量から質へ」転換",
@@ -29,7 +40,11 @@
     "url": "https://business.nikkei.com/atcl/gen/19/00081/051800943/",
     "date": "2026-05",
     "summary": "AI活用が進む企業ほど採用戦略を「量から質へ」シフトさせる傾向。採用数の絞り込みと選考の高度化が同時進行。",
-    "tags": ["採用戦略", "生成AI", "量から質へ"]
+    "tags": [
+      "採用戦略",
+      "生成AI",
+      "量から質へ"
+    ]
   },
   {
     "title": "生成AI時代の新卒採用戦略、9割が「戦略見直し」",
@@ -37,7 +52,11 @@
     "url": "https://www.hrpro.co.jp/trend_news.php?news_no=3653",
     "date": "2026",
     "summary": "人事担当者779人調査。6割超が「今のやり方を変える必要がある」、AI活用で採用業務を効率化できると考える人が約55%、採用人数が今より減ると予測する人が約4割。",
-    "tags": ["生成AI", "採用戦略", "人事意識調査"]
+    "tags": [
+      "生成AI",
+      "採用戦略",
+      "人事意識調査"
+    ]
   },
   {
     "title": "LINEヤフー、全社員に生成AI活用を義務化。人事領域で月1,600時間超の工数削減見込み",
@@ -45,7 +64,11 @@
     "url": "https://note.com/ai__worker/n/naa86c17b8b88",
     "date": "2026",
     "summary": "2025年7月に全従業員約1.1万人へ生成AI活用義務化を宣言し、2026年春までに人事総務領域で10件のAI活用ツールを順次運用開始。採用戦略のデータ整理支援やAI面接官トレーニング、日程調整の自動化などを含む。",
-    "tags": ["生成AI", "LINEヤフー", "業務効率化"]
+    "tags": [
+      "生成AI",
+      "LINEヤフー",
+      "業務効率化"
+    ]
   },
   {
     "title": "パナソニックHD「AI Career Supporter」、学生NPSを+18から+42に改善",
@@ -53,7 +76,11 @@
     "url": "https://www.works-hi.co.jp/businesscolumn/ai_and_recruitment",
     "date": "2026",
     "summary": "150超の職種情報と候補者プロファイルをAIで照合。説明会・面談工数の約30%をオンラインでの自己解決に置き換え、学生の推奨度スコア（NPS）を大幅に向上させた。",
-    "tags": ["AI Career Supporter", "パナソニック", "学生体験"]
+    "tags": [
+      "AI Career Supporter",
+      "パナソニック",
+      "学生体験"
+    ]
   },
   {
     "title": "AI検索時代、採用サイトに求められるLLMO対策",
@@ -61,6 +88,54 @@
     "url": "https://www.bitsense.co.jp/ai-recruit-site/",
     "date": "2026-07-03",
     "summary": "学生の情報収集がAI検索経由にシフトする中、採用サイトが「見つけてもらえない」リスクに備える必要性を指摘。AIは雰囲気ではなく具体的な情報をもとに判断するため、コンテンツの構造化が重要に。",
-    "tags": ["LLMO", "採用サイト", "AI検索"]
+    "tags": [
+      "LLMO",
+      "採用サイト",
+      "AI検索"
+    ]
+  },
+  {
+    "title": "AI時代、新卒採用4割減へ 大企業が進める「厳選採用」の実像 - 日経ビジネス電子版",
+    "source": "日経ビジネス電子版",
+    "url": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTE9qMGxGczh3WXF6dU1YZWRJdXJzZlFHYldCTVEzU05ZMVhaVWgxeVZub2lxZWpCVXp4aVJjM01zODBReEptU3MwR2RpSFA2LUJiekMyN0Nmbzl1TS1CYlBlQ0tTb1hRMHM?oc=5",
+    "date": "2026-07-23",
+    "summary": "AI時代、新卒採用4割減へ 大企業が進める「厳選採用」の実像  日経ビジネス電子版",
+    "tags": [
+      "AI活用",
+      "自動収集"
+    ]
+  },
+  {
+    "title": "AIに代替される新入社員――新卒一括採用は終焉するのか（河本英之 人材コンサルタント）（シェアーズカフェ・オンライン） - Yahoo!ニュース",
+    "source": "Yahoo!ニュース",
+    "url": "https://news.google.com/rss/articles/CBMif0FVX3lxTFAxOGdlajhuazh6YnU1Q0lkako1TjJCUW4wTGRaN1Jlbzl0cWNjZHVlS3dkTGlvSHk0NU91Z3hyaG54cVFERFJ2ekYzR0x4YlZnRHVaSk1TUkt4VVdzMXlhdzhqTUtRb2g5cDNhZWhZaGIzWmdNNkRpSF9JcXRPNEk?oc=5",
+    "date": "2026-07-26",
+    "summary": "AIに代替される新入社員――新卒一括採用は終焉するのか（河本英之 人材コンサルタント）（シェアーズカフェ・オンライン）  Yahoo!ニュース",
+    "tags": [
+      "AI活用",
+      "自動収集"
+    ]
+  },
+  {
+    "title": "「「採用×AI活用」事例の祭典 2026summer ～12社のリアルなAI実践と成功のポイントが学べる1日～」に株式会社Delight・福田が登壇 - 時事ドットコム",
+    "source": "時事ドットコム",
+    "url": "https://news.google.com/rss/articles/CBMia0FVX3lxTE8xSFgyaHlhNVIyS0JScmZuejBwZXRNakp5X0hYZ01mVTVOS3I3RHRsaFdQU0c1a0hwemdHNGtObDFCN3VxMzRjU2otbFBzcUxvUzhVbDV3cjNET0p2amZNeEstdFJwbWxXbVFF?oc=5",
+    "date": "2026-07-21",
+    "summary": "「「採用×AI活用」事例の祭典 2026summer ～12社のリアルなAI実践と成功のポイントが学べる1日～」に株式会社Delight・福田が登壇  時事ドットコム",
+    "tags": [
+      "AI活用",
+      "自動収集"
+    ]
+  },
+  {
+    "title": "疲弊する新卒採用の現場 「生成AIの書いた作文」を読まされる担当者 - 日経ビジネス電子版",
+    "source": "日経ビジネス電子版",
+    "url": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTE5aejJLYlR1MlIwMWlHZk5HUmxHUHNzNUZrSVhvQ1BSSkNmZjdyN2tGNV9PS1lwUndSZkF5ZVhiVVFNVWQ5TTdnMzVob1B0cEJvdUE1THdFUkxCTXBfdVYtV2JXbzZ2Sm8?oc=5",
+    "date": "2026-07-20",
+    "summary": "疲弊する新卒採用の現場 「生成AIの書いた作文」を読まされる担当者  日経ビジネス電子版",
+    "tags": [
+      "AI活用",
+      "自動収集"
+    ]
   }
 ]
