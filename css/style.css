@@ -108,6 +108,36 @@ body {
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 1.1rem 1.3rem;
+  transition: opacity 0.15s ease, border-color 0.15s ease;
+}
+
+.card.is-checked {
+  border-color: var(--accent);
+  opacity: 0.6;
+}
+
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.check-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.check-box {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--accent);
+  cursor: pointer;
 }
 
 .card-date {
