@@ -6,6 +6,13 @@ function formatDate(value) {
   return value || "";
 }
 
+// 同じ元記事から複数のカードを起こしている場合にURLが重複することがあるため、
+// 確認済み・ブックマーク・コメントの状態は「URL + タイトル」を一意キーとして保存する。
+// URLだけをキーにすると、URLが同じ別記事まで一緒に状態が変わってしまう。
+function itemKey(item) {
+  return `${item.url}::${item.title}`;
+}
+
 // チェック状態・ブックマーク・コメントはすべてこのブラウザのlocalStorageだけに保存する。
 // 他の端末・他の人が同じサイトを開いても、この一覧は共有されない。
 function loadJsonState(key) {
@@ -20,35 +27,35 @@ function saveJsonState(key, state) {
   localStorage.setItem(key, JSON.stringify(state));
 }
 
-function setChecked(url, checked) {
+function setChecked(key, checked) {
   const state = loadJsonState(CHECKED_STORAGE_KEY);
   if (checked) {
-    state[url] = true;
+    state[key] = true;
   } else {
-    delete state[url];
+    delete state[key];
   }
   saveJsonState(CHECKED_STORAGE_KEY, state);
 }
 
-function setBookmarked(url, bookmarked) {
+function setBookmarked(key, bookmarked) {
   const state = loadJsonState(BOOKMARK_STORAGE_KEY);
   if (bookmarked) {
-    state[url] = true;
+    state[key] = true;
   } else {
-    delete state[url];
+    delete state[key];
     const comments = loadJsonState(COMMENT_STORAGE_KEY);
-    delete comments[url];
+    delete comments[key];
     saveJsonState(COMMENT_STORAGE_KEY, comments);
   }
   saveJsonState(BOOKMARK_STORAGE_KEY, state);
 }
 
-function setComment(url, text) {
+function setComment(key, text) {
   const comments = loadJsonState(COMMENT_STORAGE_KEY);
   if (text) {
-    comments[url] = text;
+    comments[key] = text;
   } else {
-    delete comments[url];
+    delete comments[key];
   }
   saveJsonState(COMMENT_STORAGE_KEY, comments);
 }
@@ -65,15 +72,16 @@ function renderCard(item, state, opts = {}) {
   const tags = (item.tags || [])
     .map((tag) => `<span class="tag">${tag}</span>`)
     .join("");
-  const isChecked = Boolean(state.checked[item.url]);
-  const isBookmarked = Boolean(state.bookmarked[item.url]);
+  const key = itemKey(item);
+  const isChecked = Boolean(state.checked[key]);
+  const isBookmarked = Boolean(state.bookmarked[key]);
 
   const comment = opts.withComment
     ? `
       <div class="comment-block">
-        <label class="comment-label" for="comment-${escapeAttr(item.url)}">メモ（あとで見返すためのコメント）</label>
-        <textarea class="comment-box" id="comment-${escapeAttr(item.url)}" data-url="${escapeAttr(item.url)}" placeholder="なぜ気になったか、後で使いたい点などを書いておく…">${escapeHtml(state.comments[item.url] || "")}</textarea>
-        <div class="comment-status" data-status-for="${escapeAttr(item.url)}"></div>
+        <label class="comment-label" for="comment-${escapeAttr(key)}">メモ（あとで見返すためのコメント）</label>
+        <textarea class="comment-box" id="comment-${escapeAttr(key)}" data-key="${escapeAttr(key)}" placeholder="なぜ気になったか、後で使いたい点などを書いておく…">${escapeHtml(state.comments[key] || "")}</textarea>
+        <div class="comment-status" data-status-for="${escapeAttr(key)}"></div>
       </div>`
     : "";
 
@@ -82,10 +90,10 @@ function renderCard(item, state, opts = {}) {
       <div class="card-head">
         <div class="card-head-left">
           <label class="check-label">
-            <input type="checkbox" class="check-box" data-url="${escapeAttr(item.url)}" ${isChecked ? "checked" : ""}>
+            <input type="checkbox" class="check-box" data-key="${escapeAttr(key)}" ${isChecked ? "checked" : ""}>
             確認済み
           </label>
-          <button type="button" class="bookmark-btn ${isBookmarked ? "is-bookmarked" : ""}" data-url="${escapeAttr(item.url)}" title="ブックマーク" aria-pressed="${isBookmarked}">${isBookmarked ? "★" : "☆"}</button>
+          <button type="button" class="bookmark-btn ${isBookmarked ? "is-bookmarked" : ""}" data-key="${escapeAttr(key)}" title="ブックマーク" aria-pressed="${isBookmarked}">${isBookmarked ? "★" : "☆"}</button>
         </div>
         <div class="card-date">${formatDate(item.date)}</div>
       </div>
@@ -109,8 +117,8 @@ function currentState() {
 function renderBookmarkPanel(allItems) {
   const panelList = document.getElementById("bookmark-list");
   const state = currentState();
-  const bookmarkedUrls = new Set(Object.keys(state.bookmarked));
-  const items = allItems.filter((item) => bookmarkedUrls.has(item.url));
+  const bookmarkedKeys = new Set(Object.keys(state.bookmarked));
+  const items = allItems.filter((item) => bookmarkedKeys.has(itemKey(item)));
 
   document.getElementById("bookmark-count").textContent = items.length;
 
@@ -149,10 +157,10 @@ async function loadPanel(panelList, allItemsAccumulator) {
 function handleCardClick(event) {
   const bookmarkBtn = event.target.closest(".bookmark-btn");
   if (bookmarkBtn) {
-    const url = bookmarkBtn.dataset.url;
+    const key = bookmarkBtn.dataset.key;
     const state = currentState();
-    const nowBookmarked = !state.bookmarked[url];
-    setBookmarked(url, nowBookmarked);
+    const nowBookmarked = !state.bookmarked[key];
+    setBookmarked(key, nowBookmarked);
     renderEverything();
   }
 }
@@ -160,8 +168,8 @@ function handleCardClick(event) {
 function handleCardChange(event) {
   const checkbox = event.target.closest(".check-box");
   if (checkbox) {
-    const url = checkbox.dataset.url;
-    setChecked(url, checkbox.checked);
+    const key = checkbox.dataset.key;
+    setChecked(key, checkbox.checked);
     checkbox.closest(".card").classList.toggle("is-checked", checkbox.checked);
   }
 }
@@ -170,12 +178,12 @@ const commentTimers = {};
 function handleCardInput(event) {
   const box = event.target.closest(".comment-box");
   if (!box) return;
-  const url = box.dataset.url;
-  const statusEl = document.querySelector(`[data-status-for="${CSS.escape(url)}"]`);
+  const key = box.dataset.key;
+  const statusEl = document.querySelector(`[data-status-for="${CSS.escape(key)}"]`);
   if (statusEl) statusEl.textContent = "入力中…";
-  clearTimeout(commentTimers[url]);
-  commentTimers[url] = setTimeout(() => {
-    setComment(url, box.value);
+  clearTimeout(commentTimers[key]);
+  commentTimers[key] = setTimeout(() => {
+    setComment(key, box.value);
     if (statusEl) statusEl.textContent = "保存しました";
   }, 500);
 }
@@ -210,7 +218,7 @@ function renderEverything() {
     cards.forEach((card) => {
       const btn = card.querySelector(".bookmark-btn");
       if (!btn) return;
-      const isBookmarked = Boolean(state.bookmarked[btn.dataset.url]);
+      const isBookmarked = Boolean(state.bookmarked[btn.dataset.key]);
       btn.classList.toggle("is-bookmarked", isBookmarked);
       btn.textContent = isBookmarked ? "★" : "☆";
       btn.setAttribute("aria-pressed", String(isBookmarked));
