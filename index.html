@@ -18,6 +18,7 @@
   <button class="tab-btn active" data-target="news">採用ニュース</button>
   <button class="tab-btn" data-target="market-reports">マーケットレポート</button>
   <button class="tab-btn" data-target="ai-cases">AI活用事例</button>
+  <button class="tab-btn" data-target="bookmarks">★ ブックマーク<span class="tab-count" id="bookmark-count">0</span></button>
 </nav>
 
 <main class="container">
@@ -29,6 +30,9 @@
   </section>
   <section id="ai-cases" class="panel">
     <div class="panel-list" data-source="data/ai-cases.json"></div>
+  </section>
+  <section id="bookmarks" class="panel">
+    <div class="panel-list" id="bookmark-list"></div>
   </section>
 </main>
 
