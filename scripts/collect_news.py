@@ -43,6 +43,20 @@ TARGETS = [
 LOOKBACK_DAYS = 10
 USER_AGENT = "Mozilla/5.0 (compatible; ShinsotsuInfoHubBot/1.0)"
 
+# 会員登録・購読しないと本文が読めないことが多い媒体を、RSSの<source>名で除外する。
+# URLはGoogle News経由の難読化リンクなので、媒体名での判定が現実的な落とし所。
+# 新しく気づいた会員制媒体があればここに追記する。
+PAYWALL_SOURCE_KEYWORDS = [
+    "日本経済新聞",
+    "日経",  # 日経ビジネス、日経ビジネス電子版、日経クロステック 等
+    "東洋経済オンライン",
+    "ダイヤモンド・オンライン",
+]
+
+
+def is_paywalled(source: str) -> bool:
+    return any(keyword in (source or "") for keyword in PAYWALL_SOURCE_KEYWORDS)
+
 
 def fetch_rss(query: str) -> bytes:
     url = f"https://news.google.com/rss/search?q={quote(query)}&hl=ja&gl=JP&ceid=JP:ja"
@@ -142,6 +156,8 @@ def main():
             if added >= target["max_items"]:
                 break
             if not item["url"] or not item["title"]:
+                continue
+            if is_paywalled(item["source"]):
                 continue
             norm_title = normalize_title(item["title"])
             if item["url"] in seen_urls or norm_title in seen_titles:
