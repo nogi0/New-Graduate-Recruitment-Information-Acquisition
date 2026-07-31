@@ -16,6 +16,7 @@ from urllib.parse import quote
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data"
+SEEN_PATH = DATA_DIR / ".collected-seen.json"
 
 # ファイルごとに検索クエリとカテゴリタグ、1回あたりの最大追加件数を定義
 TARGETS = [
@@ -53,6 +54,13 @@ def fetch_rss(query: str) -> bytes:
 def strip_html(text: str) -> str:
     text = re.sub(r"<[^>]+>", "", text or "")
     return html.unescape(text).strip()
+
+
+def normalize_title(title: str) -> str:
+    # Google Newsのタイトルは "本文 - 媒体名" の形式で同じ記事が複数媒体に
+    # 配信されるため、末尾の " - 媒体名" を除いて比較する。
+    base = re.split(r"\s[-–]\s", title)[0]
+    return re.sub(r"\s+", "", base).lower()
 
 
 def parse_items(xml_bytes: bytes):
@@ -97,11 +105,31 @@ def save_json(path: Path, data):
 def main():
     cutoff = datetime.now(timezone.utc) - timedelta(days=LOOKBACK_DAYS)
 
+    # data/*.json 全体 + 過去に収集済み（その後手動で削除されたものも含む）の
+    # URL・正規化タイトルを横断で集めておく。Google Newsは同じプレスリリースを
+    # 複数媒体から配信するため、ファイル単位のチェックだけでは重複や
+    # 「一度削除したのに次回また追加される」問題を防げない。
+    seen_urls = set()
+    seen_titles = set()
+
+    seen_registry = load_json(SEEN_PATH) if SEEN_PATH.exists() else []
+    for entry in seen_registry:
+        seen_urls.add(entry.get("url"))
+        seen_titles.add(entry.get("title"))
+
+    all_existing = {}
     for target in TARGETS:
         path = DATA_DIR / target["file"]
         existing = load_json(path)
-        existing_urls = {e.get("url") for e in existing if e.get("url")}
-        existing_titles = {e.get("title") for e in existing if e.get("title")}
+        all_existing[target["file"]] = existing
+        for e in existing:
+            if e.get("url"):
+                seen_urls.add(e["url"])
+            if e.get("title"):
+                seen_titles.add(normalize_title(e["title"]))
+
+    for target in TARGETS:
+        existing = all_existing[target["file"]]
 
         try:
             xml_bytes = fetch_rss(target["query"])
@@ -115,7 +143,8 @@ def main():
                 break
             if not item["url"] or not item["title"]:
                 continue
-            if item["url"] in existing_urls or item["title"] in existing_titles:
+            norm_title = normalize_title(item["title"])
+            if item["url"] in seen_urls or norm_title in seen_titles:
                 continue
             if item["pub_date"] and item["pub_date"] < cutoff:
                 continue
@@ -136,15 +165,18 @@ def main():
                     "tags": [target["tag"], "自動収集"],
                 }
             )
-            existing_urls.add(item["url"])
-            existing_titles.add(item["title"])
+            seen_registry.append({"url": item["url"], "title": normalize_title(item["title"])})
+            seen_urls.add(item["url"])
+            seen_titles.add(norm_title)
             added += 1
 
         if added:
-            save_json(path, existing)
+            save_json(DATA_DIR / target["file"], existing)
             print(f"[info] {target['file']}: {added}件追加しました")
         else:
             print(f"[info] {target['file']}: 新着なし")
+
+    save_json(SEEN_PATH, seen_registry)
 
 
 if __name__ == "__main__":
