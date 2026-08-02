@@ -51,6 +51,9 @@ PAYWALL_SOURCE_KEYWORDS = [
     "日経",  # 日経ビジネス、日経ビジネス電子版、日経クロステック 等
     "東洋経済オンライン",
     "ダイヤモンド・オンライン",
+    "nikkei.com",  # <source>が媒体名でなくドメイン表記になるケース対策
+    "toyokeizai.net",
+    "diamond.jp",
 ]
 
 
