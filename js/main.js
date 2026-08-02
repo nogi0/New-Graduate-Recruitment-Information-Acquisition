@@ -1,6 +1,7 @@
 const CHECKED_STORAGE_KEY = "shinsotsu-hub-checked-articles";
 const BOOKMARK_STORAGE_KEY = "shinsotsu-hub-bookmarks";
 const COMMENT_STORAGE_KEY = "shinsotsu-hub-comments";
+const MIGRATION_FLAG_KEY = "shinsotsu-hub-key-migration-v1-done";
 
 function formatDate(value) {
   return value || "";
@@ -58,6 +59,52 @@ function setComment(key, text) {
     delete comments[key];
   }
   saveJsonState(COMMENT_STORAGE_KEY, comments);
+}
+
+// 以前は状態のキーがURLだけだった（"::"を含まない）。複合キー方式への移行時に
+// 古い形式のデータがブラウザに残っている場合、初回読み込み時に一度だけ変換する。
+// 同じURLを複数記事で共有しているケースは判別できないため、該当URLを持つ
+// 全記事に同じ状態を復元する（多少過剰に復元される可能性はあるが、消えるよりはよい）。
+function isLegacyKey(key) {
+  return !key.includes("::");
+}
+
+function migrateLegacyState(allItems) {
+  if (localStorage.getItem(MIGRATION_FLAG_KEY)) return;
+
+  const itemsByUrl = new Map();
+  allItems.forEach((item) => {
+    const list = itemsByUrl.get(item.url) || [];
+    list.push(item);
+    itemsByUrl.set(item.url, list);
+  });
+
+  let migratedAny = false;
+  [CHECKED_STORAGE_KEY, BOOKMARK_STORAGE_KEY, COMMENT_STORAGE_KEY].forEach((storageKey) => {
+    const state = loadJsonState(storageKey);
+    let changed = false;
+    Object.keys(state).forEach((legacyKey) => {
+      if (!isLegacyKey(legacyKey)) return;
+      const matchedItems = itemsByUrl.get(legacyKey) || [];
+      matchedItems.forEach((item) => {
+        const newKey = itemKey(item);
+        if (!(newKey in state)) {
+          state[newKey] = state[legacyKey];
+        }
+      });
+      delete state[legacyKey];
+      changed = true;
+    });
+    if (changed) {
+      saveJsonState(storageKey, state);
+      migratedAny = true;
+    }
+  });
+
+  if (migratedAny) {
+    console.info("[shinsotsu-hub] 旧形式のブックマーク/確認済み/コメントを新形式に移行しました。");
+  }
+  localStorage.setItem(MIGRATION_FLAG_KEY, "1");
 }
 
 function escapeAttr(value) {
@@ -137,21 +184,23 @@ async function fetchItems(src) {
   return res.json();
 }
 
-async function loadPanel(panelList, allItemsAccumulator) {
+async function loadItemsForPanel(panelList) {
   const src = panelList.dataset.source;
   try {
     const items = await fetchItems(src);
-    allItemsAccumulator.push(...items);
-    if (!items.length) {
-      panelList.innerHTML = '<div class="empty-state">まだ登録された情報がありません。</div>';
-      return;
-    }
-    const state = currentState();
-    const sorted = [...items].sort((a, b) => (b.date || "").localeCompare(a.date || ""));
-    panelList.innerHTML = sorted.map((item) => renderCard(item, state)).join("");
+    return { panelList, items, error: null };
   } catch (err) {
-    panelList.innerHTML = `<div class="error-state">データの読み込みに失敗しました（${src}）</div>`;
+    return { panelList, items: [], error: err };
   }
+}
+
+function renderPanelItems(panelList, items, state) {
+  if (!items.length) {
+    panelList.innerHTML = '<div class="empty-state">まだ登録された情報がありません。</div>';
+    return;
+  }
+  const sorted = [...items].sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+  panelList.innerHTML = sorted.map((item) => renderCard(item, state)).join("");
 }
 
 function handleCardClick(event) {
@@ -230,9 +279,22 @@ document.addEventListener("DOMContentLoaded", async () => {
   initTabs();
   initInteractions();
 
-  const sourcedPanels = document.querySelectorAll(".panel-list[data-source]");
+  const sourcedPanels = Array.from(document.querySelectorAll(".panel-list[data-source]"));
+  const results = await Promise.all(sourcedPanels.map(loadItemsForPanel));
+
   const allItems = [];
-  await Promise.all(Array.from(sourcedPanels).map((panelList) => loadPanel(panelList, allItems)));
+  results.forEach((r) => allItems.push(...r.items));
+  migrateLegacyState(allItems);
   cachedAllItems = allItems;
+
+  const state = currentState();
+  results.forEach((r) => {
+    if (r.error) {
+      r.panelList.innerHTML = `<div class="error-state">データの読み込みに失敗しました（${r.panelList.dataset.source}）</div>`;
+    } else {
+      renderPanelItems(r.panelList, r.items, state);
+    }
+  });
+
   renderBookmarkPanel(cachedAllItems);
 });
