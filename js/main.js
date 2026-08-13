@@ -2,6 +2,11 @@ const CHECKED_STORAGE_KEY = "shinsotsu-hub-checked-articles";
 const BOOKMARK_STORAGE_KEY = "shinsotsu-hub-bookmarks";
 const COMMENT_STORAGE_KEY = "shinsotsu-hub-comments";
 const MIGRATION_FLAG_KEY = "shinsotsu-hub-key-migration-v1-done";
+// Discord Webhook URLはこのブラウザのlocalStorageにのみ保存する。
+// リポジトリ（公開コード）には絶対に含めない（誰でも見られる場所に秘密のURLを
+// 置くと、第三者に勝手にメッセージを送信されてしまうため）。
+const DISCORD_WEBHOOK_KEY = "shinsotsu-hub-discord-webhook";
+const DISCORD_MESSAGE_LIMIT = 1900;
 
 function formatDate(value) {
   return value || "";
@@ -178,6 +183,159 @@ function renderBookmarkPanel(allItems) {
   panelList.innerHTML = sorted.map((item) => renderCard(item, state, { withComment: true })).join("");
 }
 
+function getBookmarkedItemsWithComments(allItems) {
+  const state = currentState();
+  const bookmarkedKeys = new Set(Object.keys(state.bookmarked));
+  const items = allItems.filter((item) => bookmarkedKeys.has(itemKey(item)));
+  const sorted = [...items].sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+  return sorted.map((item) => ({
+    title: item.title,
+    url: item.url,
+    date: item.date || "",
+    comment: state.comments[itemKey(item)] || "",
+  }));
+}
+
+function buildExportText(entries) {
+  if (!entries.length) return "ブックマークはまだありません。";
+  const header = `# ブックマーク一覧（${new Date().toISOString().slice(0, 10)}時点・${entries.length}件）\n`;
+  const body = entries
+    .map((e) => {
+      const lines = [`## ${e.title}`, `URL: ${e.url}`];
+      if (e.comment) lines.push(`メモ: ${e.comment}`);
+      return lines.join("\n");
+    })
+    .join("\n\n");
+  return `${header}\n${body}\n`;
+}
+
+function setToolsStatus(message) {
+  const el = document.getElementById("bookmark-tools-status");
+  if (el) el.textContent = message;
+}
+
+async function copyTextToClipboard(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch (err) {
+    return false;
+  }
+}
+
+function downloadTextFile(filename, text) {
+  const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function getDiscordWebhook() {
+  return localStorage.getItem(DISCORD_WEBHOOK_KEY) || "";
+}
+
+function setDiscordWebhook(url) {
+  if (url) {
+    localStorage.setItem(DISCORD_WEBHOOK_KEY, url);
+  } else {
+    localStorage.removeItem(DISCORD_WEBHOOK_KEY);
+  }
+}
+
+function chunkText(text, limit) {
+  const chunks = [];
+  let rest = text;
+  while (rest.length > limit) {
+    let cut = rest.lastIndexOf("\n\n", limit);
+    if (cut <= 0) cut = limit;
+    chunks.push(rest.slice(0, cut));
+    rest = rest.slice(cut);
+  }
+  if (rest) chunks.push(rest);
+  return chunks;
+}
+
+async function sendToDiscord(webhookUrl, text) {
+  const chunks = chunkText(text, DISCORD_MESSAGE_LIMIT);
+  for (const chunk of chunks) {
+    const res = await fetch(webhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content: chunk }),
+    });
+    if (!res.ok) {
+      throw new Error(`Discordへの送信に失敗しました（HTTP ${res.status}）`);
+    }
+  }
+}
+
+function initBookmarkTools() {
+  const copyBtn = document.getElementById("export-copy-btn");
+  const downloadBtn = document.getElementById("export-download-btn");
+  const discordSendBtn = document.getElementById("discord-send-btn");
+  const settingsToggle = document.getElementById("discord-settings-toggle");
+  const settingsPanel = document.getElementById("discord-settings");
+  const webhookInput = document.getElementById("discord-webhook-input");
+  const webhookSave = document.getElementById("discord-webhook-save");
+  const webhookClear = document.getElementById("discord-webhook-clear");
+
+  webhookInput.value = getDiscordWebhook();
+
+  copyBtn.addEventListener("click", async () => {
+    const entries = getBookmarkedItemsWithComments(cachedAllItems);
+    const ok = await copyTextToClipboard(buildExportText(entries));
+    setToolsStatus(ok ? `${entries.length}件をクリップボードにコピーしました。` : "コピーに失敗しました。");
+  });
+
+  downloadBtn.addEventListener("click", () => {
+    const entries = getBookmarkedItemsWithComments(cachedAllItems);
+    const filename = `bookmarks-${new Date().toISOString().slice(0, 10)}.md`;
+    downloadTextFile(filename, buildExportText(entries));
+    setToolsStatus(`${entries.length}件を ${filename} としてダウンロードしました。`);
+  });
+
+  settingsToggle.addEventListener("click", () => {
+    settingsPanel.hidden = !settingsPanel.hidden;
+  });
+
+  webhookSave.addEventListener("click", () => {
+    setDiscordWebhook(webhookInput.value.trim());
+    setToolsStatus("Discord Webhook URLを保存しました（このブラウザにのみ保存）。");
+  });
+
+  webhookClear.addEventListener("click", () => {
+    webhookInput.value = "";
+    setDiscordWebhook("");
+    setToolsStatus("Discord Webhook URLを削除しました。");
+  });
+
+  discordSendBtn.addEventListener("click", async () => {
+    const webhookUrl = getDiscordWebhook();
+    if (!webhookUrl) {
+      setToolsStatus("先に「⚙️ Discord設定」からWebhook URLを保存してください。");
+      settingsPanel.hidden = false;
+      return;
+    }
+    const entries = getBookmarkedItemsWithComments(cachedAllItems);
+    if (!entries.length) {
+      setToolsStatus("ブックマークがまだありません。");
+      return;
+    }
+    setToolsStatus("Discordに送信中…");
+    try {
+      await sendToDiscord(webhookUrl, buildExportText(entries));
+      setToolsStatus(`${entries.length}件をDiscordに送信しました。`);
+    } catch (err) {
+      setToolsStatus(err.message || "Discordへの送信に失敗しました。");
+    }
+  });
+}
+
 async function fetchItems(src) {
   const res = await fetch(src);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -278,6 +436,7 @@ function renderEverything() {
 document.addEventListener("DOMContentLoaded", async () => {
   initTabs();
   initInteractions();
+  initBookmarkTools();
 
   const sourcedPanels = Array.from(document.querySelectorAll(".panel-list[data-source]"));
   const results = await Promise.all(sourcedPanels.map(loadItemsForPanel));

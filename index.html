@@ -32,6 +32,27 @@
     <div class="panel-list" data-source="data/ai-cases.json"></div>
   </section>
   <section id="bookmarks" class="panel">
+    <div class="bookmark-tools">
+      <div class="bookmark-tools-row">
+        <button type="button" class="tool-btn" id="export-copy-btn">📋 コピー</button>
+        <button type="button" class="tool-btn" id="export-download-btn">⬇️ ダウンロード</button>
+        <button type="button" class="tool-btn" id="discord-send-btn">💬 Discordに送信</button>
+        <button type="button" class="tool-btn tool-btn-ghost" id="discord-settings-toggle">⚙️ Discord設定</button>
+      </div>
+      <div class="discord-settings" id="discord-settings" hidden>
+        <label class="discord-settings-label" for="discord-webhook-input">Discord Webhook URL</label>
+        <div class="discord-settings-row">
+          <input type="password" id="discord-webhook-input" class="discord-webhook-input" placeholder="https://discord.com/api/webhooks/...">
+          <button type="button" class="tool-btn" id="discord-webhook-save">保存</button>
+          <button type="button" class="tool-btn tool-btn-ghost" id="discord-webhook-clear">削除</button>
+        </div>
+        <p class="discord-settings-note">
+          このURLはあなたのブラウザ（localStorage）にだけ保存され、サイトのコード（GitHubリポジトリ）には一切保存されません。
+          Discordサーバーの「連携サービス」→「ウェブフック」から発行できます。
+        </p>
+      </div>
+      <div class="bookmark-tools-status" id="bookmark-tools-status"></div>
+    </div>
     <div class="panel-list" id="bookmark-list"></div>
   </section>
 </main>
